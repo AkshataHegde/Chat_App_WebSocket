@@ -35,24 +35,12 @@ public class ChatController {
         // Add username in web socket spring.jpa.hibernate.ddl-auto=createsession
         System.out.println("ChatMessage Object  "+chatMessage);
         headerAccessor.getSessionAttributes().put("username", chatMessage.getSender());
-
-
-        //storing user details into database
-        UserModel userModel=new UserModel();
-        userModel.setUserName(chatMessage.getSender());
-        userModel.setUserEmail(chatMessage.getEmailId());
-        userModel.setIsSessionActive(true);
-        userModel.setCreatedAt(DateUtil.getUTCCalenderInstance(System.currentTimeMillis()));
-        userModel.setIsActive(true);
-        userModel.setIsDeleted(false);
-
-        userModelRepository.save(userModel);
-
         return chatMessage;
     }
 
     @MessageMapping("/chat.sendMessageToUser/{user}/message")
     public void sendMessageToUser(@Payload ChatMessage chatMessage, @DestinationVariable("user") String user) {
+
 
         System.out.println("Message " + chatMessage.getContent());
         System.out.println("UserName " + user);

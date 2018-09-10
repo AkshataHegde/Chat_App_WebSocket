@@ -14,10 +14,12 @@ public class ChatRoomToUserModel {
     @Column(name = "cr_u_id")
     private Long chatRoomToUserId;
 
-
     @Column(name = "cr_u_cr_id")
     private Long cuChatRoomId;
 
     @Column(name = "cr_u_u_id")
     private Long cuUserId;
+
+    @Column(name = "cr_u_is_deleted")
+    private Boolean isDeleted;
 }
