@@ -1,9 +1,11 @@
 package com.highpeak.chat.datastore.model;
 
 
+import com.highpeak.chat.Bean.ChatMessage;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.util.Calendar;
 
 @Entity
 @Data
@@ -27,7 +29,10 @@ public class MessageModel {
     private String messageContent;
 
     @Column(name = "message_created_at")
-    private String messageCreatedAt;
+    private Calendar messageCreatedAt;
+
+    @Column(name = "message_type")
+    private ChatMessage.MessageType messageType;
 
     @Column(name = "message_is_deleted")
     private Boolean isDeleted;

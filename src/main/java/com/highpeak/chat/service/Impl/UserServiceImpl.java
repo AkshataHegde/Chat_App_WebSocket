@@ -17,8 +17,12 @@ import com.highpeak.chat.util.StringConstantUtil;
 import org.apache.log4j.Logger;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+
+import javax.transaction.Transactional;
+import java.util.List;
 
 import static com.highpeak.chat.util.StringConstantUtil.*;
 
@@ -90,7 +94,7 @@ public class UserServiceImpl implements UserService {
             for (Long participantId : chatRoomBean.getParticipantIdList()) {
                 ChatRoomToUserModel chatRoomToUserModel = new ChatRoomToUserModel();
                 chatRoomToUserModel.setCuChatRoomId(chatRoom.getChatRoomId());
-                chatRoomToUserModel.setChatRoomToUserId(participantId);
+                chatRoomToUserModel.setCuUserId(participantId);
                 chatRoomToUserModelRepository.save(chatRoomToUserModel);
             }
             return GROUP_HAS_BEEN_CREATED_SUCCESSFULLY;
@@ -104,4 +108,74 @@ public class UserServiceImpl implements UserService {
 
         }
     }
+
+
+    @Override
+    public String addToChatRoom(Long chatRoomId, List<Long> userIdList) throws DataException {
+        try
+        {
+            if(NullEmptyUtils.isNullorEmpty(chatRoomId))
+            {
+                throw new DataException(StringConstantUtil.CHAT_ERROR,GROUP_ID_SHOULD_NOT_BE_NULL_OR_EMPTY,HttpStatus.NOT_FOUND);
+            }
+
+            if(NullEmptyUtils.isNullorEmpty(userIdList))
+            {
+                throw new DataException(StringConstantUtil.CHAT_ERROR,USER_ID_SHOULD_NOT_BE_NULL_OR_EMPTY,HttpStatus.NOT_FOUND);
+            }
+
+            for (Long userId : userIdList) {
+                ChatRoomToUserModel chatRoomToUserModel = new ChatRoomToUserModel();
+                chatRoomToUserModel.setCuChatRoomId(chatRoomId);
+                chatRoomToUserModel.setCuUserId(userId);
+                chatRoomToUserModel.setIsDeleted(false);
+                chatRoomToUserModelRepository.save(chatRoomToUserModel);
+            }
+            return USER_HAS_BEEN_ADDED_SUCCESSFULLY;
+        }
+        catch(DataException e)
+        {
+            LOGGER.error(ERROR,e);
+            throw e;
+        }
+        catch (Exception e)
+        {
+            LOGGER.error(ERROR,e);
+            throw new DataException(StringConstantUtil.CHAT_ERROR,SOMETHING_WENT_WRONG_WHILE_ADDING_TO_GROUP,HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Transactional
+    @Override
+    public String leaveChatRoom(Long userId,Long chatRoomId) throws DataException {
+        try
+        {
+            if(NullEmptyUtils.isNullorEmpty(userId))
+            {
+                throw new DataException(StringConstantUtil.CHAT_ERROR,USER_ID_SHOULD_NOT_BE_NULL_OR_EMPTY,HttpStatus.NOT_FOUND);
+            }
+            if(NullEmptyUtils.isNullorEmpty(chatRoomId))
+            {
+                throw new DataException(StringConstantUtil.CHAT_ERROR,GROUP_ID_SHOULD_NOT_BE_NULL_OR_EMPTY,HttpStatus.NOT_FOUND);
+            }
+
+            if(chatRoomToUserModelRepository.leaveGroup(chatRoomId,userId)<1)
+            {
+                throw new DataException(StringConstantUtil.CHAT_ERROR,SOMETHING_WENT_WRONG_WHILE_LEAVING_GROUP,HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+
+            return USER_SUCCESSFULLY_LEFT_THE_CHAT_ROOM;
+        }
+        catch (DataException e)
+        {
+            LOGGER.error(ERROR,e);
+            throw e;
+        }
+        catch (Exception e)
+        {
+            LOGGER.error(ERROR,e);
+            throw new DataException(StringConstantUtil.CHAT_ERROR,SOMETHING_WENT_WRONG_WHILE_LEAVING_GROUP,HttpStatus.NOT_FOUND);
+        }
+    }
+
 }

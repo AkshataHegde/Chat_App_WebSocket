@@ -7,6 +7,8 @@ import com.highpeak.chat.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @CrossOrigin("*")
 @RequestMapping("/chat")
@@ -39,7 +41,28 @@ public class UserController {
         }
     }
 
+    @PostMapping("/subscription/{chatRoomId}")
+    public String addToChatRoom(@RequestBody List<Long> userIdList,@PathVariable("chatRoomId") Long chatRoomId) throws DataException {
+        try
+        {
+            return userService.addToChatRoom(chatRoomId,userIdList);
+        }
+        catch (DataException e)
+        {
+            throw e;
+        }
+    }
 
-
+    @PostMapping("/unSubscription/{chatRoomId}/{userId}")
+    public String leaveChatRoom(@PathVariable("userId") Long userId,@PathVariable("chatRoomId") Long chatRoomId) throws DataException {
+        try
+        {
+            return userService.leaveChatRoom(userId,chatRoomId);
+        }
+        catch (DataException e)
+        {
+            throw e;
+        }
+    }
 
 }
